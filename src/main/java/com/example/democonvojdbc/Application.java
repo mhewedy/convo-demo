@@ -5,6 +5,7 @@ import com.github.mhewedy.convo.ConversationRepository;
 import com.github.mhewedy.convo.annotations.Step;
 import com.github.mhewedy.convo.annotations.TimeToLive;
 import com.github.mhewedy.convo.store.StoreRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +15,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @Slf4j
 @SpringBootApplication
+@RequiredArgsConstructor
 public class Application implements CommandLineRunner {
 
-    @Autowired
-    private StoreRepository storeRepository;
-    @Autowired
-    private ConversationRepository conversationRepository;
+    private final StoreRepository storeRepository;
+    private final ConversationRepository conversationRepository;
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
@@ -29,19 +29,23 @@ public class Application implements CommandLineRunner {
     public void run(String... args) throws Exception {
         log.info("store repository implementation: {}", storeRepository);
 
+        Long ownerId = 12345L;
+
         var conv = new MyConversation();
         conv.step1Data = "step1Data";
-        conversationRepository.update(null, conv);
+        conversationRepository.update(ownerId, conv);
         log.info("conv id: {}", conv.id);
-        log.info("conv: {}", conversationRepository.findById(null, conv.id, MyConversation.class));
+        log.info("conv: {}", conversationRepository.findById(ownerId, conv.id, MyConversation.class));
 
-        conv = conversationRepository.findById(null, conv.id, MyConversation.class);
-        log.info("conv: {}", conversationRepository.findById(null, conv.id, MyConversation.class));
+        conv = conversationRepository.findById(ownerId, conv.id, MyConversation.class);
+        log.info("conv: {}", conversationRepository.findById(ownerId, conv.id, MyConversation.class));
         conv.step2Data =  new MyConversation.Step2Data();
         conv.step2Data.v = 999;
-        conversationRepository.update(null, conv);
+        conversationRepository.update(ownerId, conv);
 
-        log.info("conv: {}", conversationRepository.findById(null, conv.id, MyConversation.class));
+        log.info("conv: {}", conversationRepository.findById(ownerId, conv.id, MyConversation.class));
+
+//        conversationRepository.remove(ownerId, conv.id, MyConversation.class);
     }
 
     @TimeToLive(duration = "PT5M")
